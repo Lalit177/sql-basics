@@ -1,0 +1,352 @@
+DROP TABLE student;
+CREATE TABLE student(
+    student_ID INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(1000) NOT NULL,major VARCHAR(100) 
+);
+#use DROP command  before make changes to create table  query;
+SELECT * FROM student;
+#DESCRIBE student;
+#DROP TABLE student;
+ALTER TABLE student ADD gpa decimal(3,2);
+ALTER TABLE student DROP COLUMN gpa;    #alter make changes to table column
+
+INSERT INTO student(name, major) VALUES('RAJ','marathi');
+INSERT INTO student (name, major)VALUES('JACK','math');
+INSERT INTO student (name, major)VALUES('JACK','science');
+
+#UPDATE
+UPDATE student SET major= 'ENGLISH' where major= 'marathi';
+UPDATE student SET major= 'spanish' where student_ID = 3 ;
+
+#WE CAN USE  COMPARISON OPERATORS FOR WHERE COND.
+
+#DELETE deleted whole table, row or column
+
+SELECT name from student;
+SELECT student.major,student.name from student ORDER BY name;
+SELECT * from student ORDER BY student_ID DESC;
+SELECT * from student ORDER BY student_ID ASC;
+
+
+create table lib(student_id INT,book_name varchar(19),FOREIGN KEY(student_id) REFERENCES student(student_ID) ON DELETE SET NULL);
+INSERT into lib VALUES(3,'marathi');
+INSERT into lib VALUES(1,'spanish');
+alter table lib rename student_id to student_ID;
+select * from lib;
+
+create table lib1(student_ID INT,book_name varchar(19),FOREIGN KEY(student_Id) REFERENCES student(student_ID) ON DELETE SET NULL);
+INSERT into lib1 VALUES(3,'marathi');
+INSERT into lib1 VALUES(1,'spanish');
+INSERT into lib1 VALUES(NULL,NULL);
+
+desc lib;
+
+TRUNCATE TABLE table_name;
+/*The TRUNCATE TABLE statement is used to delete the data inside a table, but not the table itself.
+The ALTER TABLE statement is used to add, delete, or modify columns in an existing table.
+
+
+*SQL Create Constraints
+Constraints can be specified when the table is created with the CREATE TABLE statement, or after the table is created with the ALTER TABLE statement.
+
+Syntax
+CREATE TABLE table_name (
+    column1 datatype constraint,
+    column2 datatype constraint,
+    column3 datatype constraint,
+    ....
+);
+
+NOT NULL - Ensures that a column cannot have a NULL value
+UNIQUE - Ensures that all values in a column are different
+PRIMARY KEY - A combination of a NOT NULL and UNIQUE. Uniquely identifies each row in a table
+FOREIGN KEY - Uniquely identifies a row/record in another table
+CHECK - Ensures that all values in a column satisfies a specific condition
+DEFAULT - Sets a default value for a column when no value is specified
+INDEX - Used to create and retrieve data from the database very quickly
+
+
+
+#------company db 
+
+CREATE TABLE employee (
+  emp_id INT PRIMARY KEY,
+  first_name VARCHAR(40),
+  last_name VARCHAR(40),
+  birth_day DATE,
+  sex VARCHAR(1),
+  salary INT,
+  super_id INT,
+  branch_id INT
+);
+
+CREATE TABLE branch (
+  branch_id INT PRIMARY KEY,
+  branch_name VARCHAR(40),
+  mgr_id INT,
+  mgr_start_date DATE,
+  FOREIGN KEY(mgr_id) REFERENCES employee(emp_id) ON DELETE SET NULL
+);    /*ON DELETE SET NULL IS FOR
+         WHEN WE DELETE ANY EMPID ASSOSIATED WITH THAT PARTICULAR MGRID 
+            IT DOESNOT DELETE THAT BRANCH ID ROW BUT IT SET IT TO ALL VALUES TO "NULL".
+    */
+
+ALTER TABLE employee
+ADD FOREIGN KEY(branch_id)
+REFERENCES branch(branch_id)
+ON DELETE SET NULL;
+
+ALTER TABLE employee
+ADD FOREIGN KEY(super_id)
+REFERENCES employee(emp_id)
+ON DELETE SET NULL;
+
+CREATE TABLE client (
+  client_id INT PRIMARY KEY,
+  client_name VARCHAR(40),
+  branch_id INT,
+  FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE SET NULL
+);
+
+CREATE TABLE works_with (
+  emp_id INT,
+  client_id INT,
+  total_sales INT,
+  PRIMARY KEY(emp_id, client_id),
+  FOREIGN KEY(emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE,
+  FOREIGN KEY(client_id) REFERENCES client(client_id) ON DELETE CASCADE
+);
+
+CREATE TABLE branch_supplier (
+  branch_id INT,
+  supplier_name VARCHAR(40),
+  supply_type VARCHAR(40),
+  PRIMARY KEY(branch_id, supplier_name),
+  FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE CASCADE
+); 
+/* ON DELETE CASCADE is the opp of on delete set null
+        it DELETE THE WHOLE ROW.
+            suppose if we delete branch id 2 then it will delete all row that assosiated with branch_id 2.
+                we cnt set primary key 2 NULL.
+*/
+
+-- Corporate
+INSERT INTO employee VALUES(100, 'David', 'Wallace', '1967-11-17', 'M', 250000, NULL, NULL);
+
+INSERT INTO branch VALUES(1, 'Corporate', 100, '2006-02-09');
+
+UPDATE employee
+SET branch_id = 1
+WHERE emp_id = 100;
+
+INSERT INTO employee VALUES(101, 'Jan', 'Levinson', '1961-05-11', 'F', 110000, 100, 1);
+
+-- Scranton
+INSERT INTO employee VALUES(102, 'Michael', 'Scott', '1964-03-15', 'M', 75000, 100, NULL);
+
+INSERT INTO branch VALUES(2, 'Scranton', 102, '1992-04-06');
+
+UPDATE employee
+SET branch_id = 2
+WHERE emp_id = 102;
+
+INSERT INTO employee VALUES(103, 'Angela', 'Martin', '1971-06-25', 'F', 63000, 102, 2);
+INSERT INTO employee VALUES(104, 'Kelly', 'Kapoor', '1980-02-05', 'F', 55000, 102, 2);
+INSERT INTO employee VALUES(105, 'Stanley', 'Hudson', '1958-02-19', 'M', 69000, 102, 2);
+
+-- Stamford
+INSERT INTO employee VALUES(106, 'Josh', 'Porter', '1969-09-05', 'M', 78000, 100, NULL);
+
+INSERT INTO branch VALUES(3, 'Stamford', 106, '1998-02-13');
+
+UPDATE employee
+SET branch_id = 3
+WHERE emp_id = 106;
+
+INSERT INTO employee VALUES(107, 'Andy', 'Bernard', '1973-07-22', 'M', 65000, 106, 3);
+INSERT INTO employee VALUES(108, 'Jim', 'Halpert', '1978-10-01', 'M', 71000, 106, 3);
+
+
+-- BRANCH SUPPLIER
+INSERT INTO branch_supplier VALUES(2, 'Hammer Mill', 'Paper');
+INSERT INTO branch_supplier VALUES(2, 'Uni-ball', 'Writing Utensils');
+INSERT INTO branch_supplier VALUES(3, 'Patriot Paper', 'Paper');
+INSERT INTO branch_supplier VALUES(2, 'J.T. Forms & Labels', 'Custom Forms');
+INSERT INTO branch_supplier VALUES(3, 'Uni-ball', 'Writing Utensils');
+INSERT INTO branch_supplier VALUES(3, 'Hammer Mill', 'Paper');
+INSERT INTO branch_supplier VALUES(3, 'Stamford Lables', 'Custom Forms');
+
+-- CLIENT
+INSERT INTO client VALUES(400, 'Dunmore Highschool', 2);
+INSERT INTO client VALUES(401, 'Lackawana Country', 2);
+INSERT INTO client VALUES(402, 'FedEx', 3);
+INSERT INTO client VALUES(403, 'John Daly Law, LLC', 3);
+INSERT INTO client VALUES(404, 'Scranton Whitepages', 2);
+INSERT INTO client VALUES(405, 'Times Newspaper', 3);
+INSERT INTO client VALUES(406, 'FedEx', 2);
+
+-- WORKS_WITH
+INSERT INTO works_with VALUES(105, 400, 55000);
+INSERT INTO works_with VALUES(102, 401, 267000);
+INSERT INTO works_with VALUES(108, 402, 22500);
+INSERT INTO works_with VALUES(107, 403, 5000);
+INSERT INTO works_with VALUES(108, 403, 12000);
+INSERT INTO works_with VALUES(105, 404, 33000);
+INSERT INTO works_with VALUES(107, 405, 26000);
+INSERT INTO works_with VALUES(102, 406, 15000);
+INSERT INTO works_with VALUES(105, 406, 130000);
+
+#BASIC QUERIES........
+
+#1.FIND ALL THE employee FROM employee TABLE
+select * from employee;     #.....like we get all the diff tables using table name.
+
+#2.find all employee ordered by salary high salary first.
+select * from employee order by salary desc;
+
+#3.find all emp order by sex then name.
+select * from employee order by sex, first_name, last_name;
+
+#4.select first 5 employee.
+select * from employee limit 5 ;
+
+#5.which diff type of sex in emp.
+select distinct sex from employee;
+
+#6.find forename and surname .
+select first_name as forename, last_name as surname from employee;
+
+#FUNCTIONS.....
+#1.find number of employee.
+select COUNT(emp_id) from employee;
+
+select COUNT(emp_id) from employee where sex='F' AND birth_day>'1971-01-01';
+
+SELECT COUNT(sex),sex from employee group by sex;  #it will show how many m and f.
+
+#LIKE THESE WE CAN USE 'AVG','SUM',
+
+select SUM(total_sales),emp_id from works_with group by emp_id;
+#add coumn name if u want to grp with that table name.
+
+
+/*WILDCARDS...........
+-Wildcard Characters in MS Access
+Symbol	Description	Example
+*	Represents zero or more characters	bl* finds bl, black, blue, and blob
+?	Represents a single character	h?t finds hot, hat, and hit
+[]	Represents any single character within the brackets	h[oa]t finds hot and hat, but not hit
+!	Represents any character not in the brackets	h[!oa]t finds hit, but not hot and hat
+-	Represents a range of characters	c[a-b]t finds cat and cbt
+#	Represents any single numeric character	2#5 finds 205, 215, 225, 235, 245, 255, 265, 275, 285, and 295
+
+
+.Wildcard Characters in SQL Server
+.Symbol	Description	Example
+.%	Represents zero or more characters	bl% finds bl, black, blue, and blob
+._	Represents a single character	h_t finds hot, hat, and hit
+.[]	Represents any single character within the brackets	h[oa]t finds hot and hat, but not hit
+.^	Represents any character not in the brackets	h[^oa]t finds hit, but not hot and hat
+.-	Represents a range of characters	c[a-b]t finds cat and cbt
+.All the wildcards can also be used in combinations!
+
+Here are some examples showing different LIKE operators with '%' and '_' wildcards:
+
+#LIKE Operator	Description
+WHERE CustomerName LIKE 'a%'	Finds any values that starts with "a"
+WHERE CustomerName LIKE '%a'	Finds any values that ends with "a"
+WHERE CustomerName LIKE '%or%'	Finds any values that have "or" in any position
+WHERE CustomerName LIKE '_r%'	Finds any values that have "r" in the second position
+WHERE CustomerName LIKE 'a_%_%'	Finds any values that starts with "a" and are at least 3 characters in length
+WHERE ContactName LIKE 'a%o'	Finds any values that starts with "a" and ends with "o")-----#
+
+ ...'%' used for any # charecters and '_' for one charecter.
+*/
+select * from client where client_name LIKE '%LLC';
+
+
+#....UNION OP.
+#1.select list of emp and branch name
+select first_name from employee UNION select branch_name from branch;
+
+/*The UNION operator is used to combine the result-set of two or more SELECT statements.
+Each SELECT statement within UNION must have the same number of columns
+The columns must also have similar data types
+The columns in each SELECT statement must also be in the same orde
+*/
+#...JOINs
+/*
+.(INNER) JOIN: Returns records that have matching values in both tables
+.LEFT (OUTER) JOIN: Returns all records from the left table, and the matched records from the right table
+.RIGHT (OUTER) JOIN: Returns all records from the right table, and the matched records from the left table
+.FULL (OUTER) JOIN: Returns all records when there is a match in either left or right table
+*/
+
+
+/* 1st select the  columns we want from both tables 
+    then for from gave the table name
+        then for join gave the another table name
+            then for on gave the column name which is similar in both table like empid=mgrid.
+*/
+
+INSERT into branch VALUES(4,'duf',NULL,NULL);
+delete from branch where branch_id=5;
+select* from branch;
+
+#1.join...inner join....
+select employee.emp_id,employee.first_name,branch.branch_name
+from employee
+JOIN branch
+on employee.emp_id=branch.mgr_id;
+
+
+#2.LEFT JOIN
+select employee.emp_id,employee.first_name,branch.branch_name
+from employee
+LEFT JOIN branch
+on employee.emp_id=branch.mgr_id;
+
+#3.RIGHT join
+select employee.emp_id,employee.first_name,branch.branch_name
+from employee
+RIGHT JOIN branch
+on employee.emp_id=branch.mgr_id;
+
+#4 full join 
+/*as mysql dosent support full join you can doit by right and left join using union all*/
+
+select employee.emp_id,employee.first_name,branch.branch_name
+from employee
+LEFT JOIN branch
+on employee.emp_id=branch.mgr_id
+UNION 
+select employee.emp_id,employee.first_name,branch.branch_name
+from employee
+RIGHT JOIN branch
+on employee.emp_id=branch.mgr_id;
+
+#NESTED QUERIES
+#1. find the name of all employees who sold over 30k to single client.
+select first_name,last_name from employee
+where emp_id IN (
+select emp_id from works_with
+where total_sales > 30000);
+
+#2.find all clients handles by scott scott id is 102
+select client_name from client
+where branch_id=(
+select branch_id from branch where mgr_id = 102);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
